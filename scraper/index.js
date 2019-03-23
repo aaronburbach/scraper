@@ -1,22 +1,43 @@
-import { getHTML, getTwitterFollowers, getInstagramFollowers } from './lib/scraper';
+import express from 'express';
+import {
+    getInstagramCount, 
+    getTwitterCount
+ } from './lib/scraper';
+import db from './lib/db';
+import './lib/cron'; // by simply importing the file, it will make the cron kick off.
 
-async function go() {
-    const instagramUsername = '';
-    const twitterUsername = '';
+const app = express();
 
-    const instagramUrl = `https://www.instagram.com/${instagramUsername}`;
-    const twitterUrl = `https://twitter.com/${twitterUsername}`;
+app.get('/scrape', async (req, res, next) => {
+    console.log('Commence Scraping...!');
+    const instagramUsername = 'aaronburbach2016';
+    const twitterUsername = 'aburbach14';
+
+    const [instagramCount, twitterCount] = await Promise.all([
+        getInstagramCount(instagramUsername), 
+        getTwitterCount(twitterUsername)
+    ]);
     
-    const instagramPromise = getHTML(instagramUrl);
-    const twitterPromise = getHTML(twitterUrl);
-
-    const [instagramHtml, twitterHtml] = await Promise.all([instagramPromise, twitterPromise]);
-
-    const instagramFollowers = await getInstagramFollowers(instagramHtml);
-    const twitterFollowersCount = await getTwitterFollowers(twitterHtml);
+    console.log('Done Scraping!!');
     
-    console.log(`${instagramUsername} has ${instagramFollowers} Instagram followers!`);
-    console.log(`${twitterUsername} has ${twitterFollowersCount} Twitter followers!`);
-} 
+    res.json({instagramCount, twitterCount});
+});
 
-go();
+var server = app.listen(2093, () => {
+    console.log(`Example App running on port ${server.address().port}`);
+});
+
+// async function go() {
+//     const instagramUsername = 'aaronburbach2016';
+//     const twitterUsername = 'aburbach14';
+
+//     const [instagramCount, twitterCount] = await Promise.all([
+//         getInstagramCount(instagramUsername), 
+//         getTwitterCount(twitterUsername)
+//     ]);
+   
+//     console.log(`${instagramUsername} has ${instagramCount} Instagram followers!`);
+//     console.log(`${twitterUsername} has ${twitterCount} Twitter followers!`);
+// } 
+
+// go();
