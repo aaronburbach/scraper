@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import {
     getInstagramCount, 
     getTwitterCount
@@ -7,6 +8,7 @@ import db from './lib/db';
 import './lib/cron'; // by simply importing the file, it will make the cron kick off.
 
 const app = express();
+app.use(cors());
 
 app.get('/scrape', async (req, res, next) => {
     console.log('Commence Scraping...!');
@@ -23,8 +25,18 @@ app.get('/scrape', async (req, res, next) => {
     res.json({instagramCount, twitterCount});
 });
 
+app.get('/data', async (req, res, next) => {
+    // get the scrape data
+    // For performance, use .value() instead of .write() if you're only reading from db
+    // grab everything and send it for now ... filter in the future
+    const data = db.value();
+
+    // respond with json
+    res.json(data);
+});
+
 var server = app.listen(2093, () => {
-    console.log(`Example App running on port ${server.address().port}`);
+    console.log(`Example App running on port http://localhost:${server.address().port}`);
 });
 
 // async function go() {
