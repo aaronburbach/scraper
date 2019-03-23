@@ -1,5 +1,6 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
+import db from './db';
 
 export async function getHTML(url) {
     console.log('Fetching ... ' + url);
@@ -35,4 +36,51 @@ export async function getInstagramFollowers(html) {
         console.error('Error! --> ' + e);
         return 'Error!';
     }
+}
+
+export async function getInstagramCount(username) {
+    const url = `https://www.instagram.com/${username}`;
+    const html = await getHTML(url);
+    const followerCount = await getInstagramFollowers(html);
+    return followerCount;
+}
+
+export async function getTwitterCount(username) {
+    const url = `https://twitter.com/${username}`;
+    const html = await getHTML(url);
+    const followerCount = await getTwitterFollowers(html);
+    return followerCount;
+}
+
+export async function runCron() {
+    console.log('Commence Scraping...!');
+
+    const instagramUsername = 'aaronburbach2016';
+    const twitterUsername = 'aburbach14';
+
+    const [instagramCount, twitterCount] = await Promise.all([
+        getInstagramCount(instagramUsername), 
+        getTwitterCount(twitterUsername)
+    ]);
+   
+    console.log(`${instagramUsername} has ${instagramCount} Instagram followers!`);
+    console.log(`${twitterUsername} has ${twitterCount} Twitter followers!`);
+
+    db.get('twitter')
+        .push({
+            date: Date.now(),
+            username: twitterUsername,
+            count: twitterCount
+        })
+        .write();
+        
+    db.get('instagram')
+        .push({
+            date: Date.now(),
+            username: instagramUsername,
+            count: instagramCount
+        })
+        .write();
+
+    console.log('Done Scraping!!');
 }
