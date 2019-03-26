@@ -55,8 +55,10 @@ export async function getTwitterCount(username) {
 export async function runCron() {
     console.log('Commence Scraping...!');
 
-    const instagramUsername = 'makingbigbank';
-    const twitterUsername = 'snarkosaurous';
+    // const instagramUsername = 'makingbigbank';
+    // const twitterUsername = 'snarkosaurous';
+    const instagramUsername = 'performancebeef';
+    const twitterUsername = 'PerformanceBeef';
 
     const [instagramCount, twitterCount] = await Promise.all([
         getInstagramCount(instagramUsername), 

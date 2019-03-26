@@ -1,11 +1,15 @@
 import express from 'express';
 import cors from 'cors';
+import logtimestamp from 'log-timestamp';
+import { uniqueCount } from './lib/utils'
 import {
     getInstagramCount, 
     getTwitterCount
  } from './lib/scraper';
 import db from './lib/db';
 import './lib/cron'; // by simply importing the file, it will make the cron kick off.
+
+require('log-timestamp');
 
 const app = express();
 app.use(cors());
@@ -29,10 +33,14 @@ app.get('/data', async (req, res, next) => {
     // get the scrape data
     // For performance, use .value() instead of .write() if you're only reading from db
     // grab everything and send it for now ... filter in the future
-    const data = db.value();
+    const { twitter, instagram } = db.value();
+
+    // filter for only unique values
+    const uniqueTwitter = uniqueCount(twitter);
+    const uniqueInstagram = uniqueCount(instagram);
 
     // respond with json
-    res.json(data);
+    res.json({ twitter: uniqueTwitter, instagram: uniqueInstagram });
 });
 
 var server = app.listen(2093, () => {
